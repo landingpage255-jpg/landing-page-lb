@@ -6,382 +6,403 @@
 <title>Simulatore Rinegoziazione Noleggio</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #ffffff;
+  --bg-secondary: #f5f4f0;
+  --bg-success: #eaf3de;
+  --bg-info: #e6f1fb;
+  --bg-warning: #faeeda;
+  --bg-danger: #fcebeb;
+  --text: #1a1a18;
+  --text-secondary: #5f5e5a;
+  --text-tertiary: #888780;
+  --text-success: #27500a;
+  --text-info: #0c447c;
+  --text-warning: #633806;
+  --text-danger: #791f1f;
+  --border: rgba(0,0,0,0.12);
+  --border-secondary: rgba(0,0,0,0.22);
+  --border-success: rgba(59,109,17,0.35);
+  --border-info: rgba(24,95,165,0.35);
+  --border-warning: rgba(99,56,6,0.35);
+  --border-danger: rgba(163,45,45,0.35);
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+@media (prefers-color-scheme: dark) {
   :root {
-    --bg: #ffffff;
-    --bg-secondary: #f5f4f0;
-    --bg-success: #eaf3de;
-    --bg-info: #e6f1fb;
-    --bg-warning: #faeeda;
-    --bg-danger: #fcebeb;
-    --text: #1a1a18;
-    --text-secondary: #5f5e5a;
+    --bg: #1e1e1c;
+    --bg-secondary: #2a2a27;
+    --bg-success: #173404;
+    --bg-info: #042c53;
+    --bg-warning: #412402;
+    --bg-danger: #501313;
+    --text: #f0ede8;
+    --text-secondary: #b4b2a9;
     --text-tertiary: #888780;
-    --text-success: #27500a;
-    --text-info: #0c447c;
-    --text-warning: #633806;
-    --text-danger: #791f1f;
-    --border: rgba(0,0,0,0.12);
-    --border-secondary: rgba(0,0,0,0.22);
-    --border-success: rgba(59,109,17,0.35);
-    --border-info: rgba(24,95,165,0.35);
-    --border-warning: rgba(99,56,6,0.35);
-    --border-danger: rgba(163,45,45,0.35);
-    --radius: 8px;
-    --radius-lg: 12px;
+    --text-success: #c0dd97;
+    --text-info: #b5d4f4;
+    --text-warning: #fac775;
+    --text-danger: #f7c1c1;
+    --border: rgba(255,255,255,0.1);
+    --border-secondary: rgba(255,255,255,0.2);
+    --border-success: rgba(192,221,151,0.3);
+    --border-info: rgba(181,212,244,0.3);
+    --border-warning: rgba(250,199,117,0.3);
+    --border-danger: rgba(247,193,193,0.3);
   }
-
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #1e1e1c;
-      --bg-secondary: #2a2a27;
-      --bg-success: #173404;
-      --bg-info: #042c53;
-      --bg-warning: #412402;
-      --bg-danger: #501313;
-      --text: #f0ede8;
-      --text-secondary: #b4b2a9;
-      --text-tertiary: #888780;
-      --text-success: #c0dd97;
-      --text-info: #b5d4f4;
-      --text-warning: #fac775;
-      --text-danger: #f7c1c1;
-      --border: rgba(255,255,255,0.1);
-      --border-secondary: rgba(255,255,255,0.2);
-      --border-success: rgba(192,221,151,0.3);
-      --border-info: rgba(181,212,244,0.3);
-      --border-warning: rgba(250,199,117,0.3);
-      --border-danger: rgba(247,193,193,0.3);
-    }
-  }
-
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    background: var(--bg-secondary);
-    color: var(--text);
-    min-height: 100vh;
-    padding: 2rem 1rem;
-  }
-
-  .page { max-width: 860px; margin: 0 auto; }
-
-  header { margin-bottom: 2rem; }
-  header h1 { font-size: 20px; font-weight: 500; margin-bottom: 4px; }
-  header p { font-size: 14px; color: var(--text-secondary); }
-
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 1.5rem; }
-  @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
-
-  .card {
-    background: var(--bg);
-    border: 0.5px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 1.25rem;
-  }
-
-  .section-label {
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--text-tertiary);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-bottom: 14px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .field-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-  .field-label { font-size: 13px; color: var(--text-secondary); flex: 1; }
-  .field-unit { font-size: 12px; color: var(--text-tertiary); white-space: nowrap; }
-
-  input[type="text"], input[type="number"] {
-    width: 88px;
-    font-size: 13px;
-    text-align: right;
-    padding: 0 8px;
-    height: 32px;
-    border-radius: var(--radius);
-    border: 0.5px solid var(--border-secondary);
-    background: var(--bg);
-    color: var(--text);
-    font-family: inherit;
-  }
-  input[type="text"] { text-align: left; width: 100px; }
-  input:focus { outline: none; box-shadow: 0 0 0 2px #378ADD55; border-color: #378ADD; }
-
-  input[type="range"] {
-    width: 100%;
-    accent-color: #378ADD;
-    cursor: pointer;
-  }
-
-  .field-readonly {
-    width: 88px;
-    font-size: 13px;
-    text-align: right;
-    padding: 0 8px;
-    height: 32px;
-    border-radius: var(--radius);
-    border: 0.5px solid var(--border);
-    background: var(--bg-secondary);
-    color: var(--text-secondary);
-    display: inline-flex;
-    align-items: center;
-    justify-content: flex-end;
-  }
-
-  .divider { border: none; border-top: 0.5px solid var(--border); margin: 1.25rem 0; }
-
-  .metrics-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .metric { background: var(--bg-secondary); border-radius: var(--radius); padding: 12px 14px; }
-  .metric-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
-  .metric-value { font-size: 20px; font-weight: 500; }
-
-  .slider-row { margin-bottom: 14px; }
-  .slider-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
-  .slider-name { font-size: 13px; color: var(--text-secondary); }
-  .slider-val { font-size: 13px; font-weight: 500; }
-  .slider-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
-
-  .pill {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 500;
-    padding: 3px 10px;
-    border-radius: 20px;
-  }
-
-  .alert {
-    border-radius: var(--radius);
-    padding: 10px 14px;
-    font-size: 13px;
-    margin-bottom: 1rem;
-    display: none;
-  }
-
-  .chart-legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-    margin-bottom: 8px;
-    font-size: 12px;
-    color: var(--text-secondary);
-    align-items: center;
-  }
-  .legend-item { display: flex; align-items: center; gap: 5px; }
-  .legend-line { width: 20px; height: 2px; display: inline-block; }
-  .legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-
-  .chart-wrap { position: relative; width: 100%; height: 280px; }
-
-  footer { margin-top: 2rem; text-align: center; font-size: 12px; color: var(--text-tertiary); }
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg-secondary);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 2rem 1rem;
+}
+.page { max-width: 860px; margin: 0 auto; }
+header { margin-bottom: 2rem; }
+header h1 { font-size: 20px; font-weight: 500; margin-bottom: 4px; }
+header p { font-size: 14px; color: var(--text-secondary); }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 1.5rem; }
+@media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
+.card {
+  background: var(--bg);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+}
+.section-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.field-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.field-label { font-size: 13px; color: var(--text-secondary); flex: 1; }
+.field-unit { font-size: 12px; color: var(--text-tertiary); white-space: nowrap; }
+.iva-tag { font-size: 10px; color: var(--text-tertiary); font-weight: 400; white-space: nowrap; }
+input[type="text"], input[type="number"] {
+  width: 88px;
+  font-size: 13px;
+  text-align: right;
+  padding: 0 8px;
+  height: 32px;
+  border-radius: var(--radius);
+  border: 0.5px solid var(--border-secondary);
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+}
+input[type="text"] { text-align: left; width: 100px; }
+input:focus { outline: none; box-shadow: 0 0 0 2px #378ADD55; border-color: #378ADD; }
+input[type="range"] {
+  width: 100%;
+  accent-color: #378ADD;
+  cursor: pointer;
+}
+.field-readonly {
+  width: 88px;
+  font-size: 13px;
+  text-align: right;
+  padding: 0 8px;
+  height: 32px;
+  border-radius: var(--radius);
+  border: 0.5px solid var(--border);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.divider { border: none; border-top: 0.5px solid var(--border); margin: 1.25rem 0; }
+.metrics-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.metric { background: var(--bg-secondary); border-radius: var(--radius); padding: 12px 14px; }
+.metric-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+.metric-value { font-size: 20px; font-weight: 500; }
+.slider-row { margin-bottom: 14px; }
+.slider-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+.slider-name { font-size: 13px; color: var(--text-secondary); }
+.slider-val { font-size: 13px; font-weight: 500; }
+.slider-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+.pill {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+.alert {
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-bottom: 1rem;
+  display: none;
+}
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  align-items: center;
+}
+.legend-item { display: flex; align-items: center; gap: 5px; }
+.legend-line { width: 20px; height: 2px; display: inline-block; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.chart-wrap { position: relative; width: 100%; height: 280px; }
+footer { margin-top: 2rem; text-align: center; font-size: 12px; color: var(--text-tertiary); }
+.disclaimer {
+  display: none;
+  margin-top: 1.5rem;
+  padding: 14px 18px;
+  border-radius: var(--radius);
+  background: var(--bg-success);
+  color: var(--text-success);
+  border: 0.5px solid var(--border-success);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+.btn-calcola {
+  width: 100%;
+  margin-top: 1.25rem;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  border: 0.5px solid #378ADD;
+  background: #378ADD;
+  color: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.btn-calcola:hover { background: #2f78c4; border-color: #2f78c4; }
+.btn-calcola:active { transform: translateY(0.5px); }
 </style>
 </head>
 <body>
 <div class="page">
-
-  <header>
-    <h1>Simulatore rinegoziazione noleggio</h1>
-    <p>Inserisci i parametri del contratto attuale e usa gli slider per simulare la proposta.</p>
-  </header>
-
-  <div class="grid-2">
-
-    <div class="card">
-      <div class="section-label">Contratto attuale</div>
-
-      <div class="field-row">
-        <span class="field-label">Targa / ID cliente</span>
-        <input type="text" id="inp-targa" value="GG666GG">
-      </div>
-      <div class="field-row">
-        <span class="field-label">Costo noleggiatore</span>
-        <input type="number" id="inp-costo" min="0" step="1" value="300">
-        <span class="field-unit">€/mese</span>
-      </div>
-      <div class="field-row">
-        <span class="field-label">Rata fissa cliente</span>
-        <input type="number" id="inp-fissa" min="0" step="1" value="180">
-        <span class="field-unit">€/mese</span>
-      </div>
-      <div class="field-row">
-        <span class="field-label">Var. servizi cliente</span>
-        <input type="number" id="inp-serv" min="0" step="0.01" value="0.15">
-        <span class="field-unit">€/km</span>
-      </div>
-      <div class="field-row">
-        <span class="field-label">Var. assicurazione</span>
-        <input type="number" id="inp-ass" min="0" step="0.01" value="0.13">
-        <span class="field-unit">€/km</span>
-      </div>
-      <div class="field-row">
-        <span class="field-label" style="font-weight:500;color:var(--text);">Var. totale cliente</span>
-        <div class="field-readonly" id="disp-var-tot">0.28</div>
-        <span class="field-unit">€/km</span>
-      </div>
-      <div class="field-row">
-        <span class="field-label">Percorrenza media</span>
-        <input type="number" id="inp-km" min="0" step="10" value="400">
-        <span class="field-unit">km/mese</span>
-      </div>
-
-      <hr class="divider">
-      <div class="metrics-2">
-        <div class="metric">
-          <div class="metric-label">Canone cliente</div>
-          <div class="metric-value" id="m-canone-att">—</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label">Profitto / perdita</div>
-          <div class="metric-value" id="m-profit-att">—</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="section-label">
-        <span>Proposta rinegoziata</span>
-        <span class="pill" id="pill-stato" style="background:var(--bg-warning);color:var(--text-warning)">in corso</span>
-      </div>
-
-      <div class="slider-row">
-        <div class="slider-header">
-          <span class="slider-name">Rata fissa</span>
-          <span class="slider-val" id="lbl-nfissa">—</span>
-        </div>
-        <input type="range" id="sl-fissa" step="1" oninput="onSlider()">
-        <div class="slider-sub" id="sub-fissa"></div>
-      </div>
-
-      <div class="slider-row">
-        <div class="slider-header">
-          <span class="slider-name">Var. servizi</span>
-          <span class="slider-val" id="lbl-nserv">—</span>
-        </div>
-        <input type="range" id="sl-serv" min="0" max="0.40" step="0.01" oninput="onSlider()">
-        <div class="slider-sub" id="sub-serv"></div>
-      </div>
-
-      <div class="field-row" style="margin-top:4px;">
-        <span class="field-label">Var. assicurazione</span>
-        <div class="field-readonly" id="out-ass">0.13</div>
-        <span class="field-unit">€/km</span>
-      </div>
-      <div class="field-row">
-        <span class="field-label" style="font-weight:500;color:var(--text);">Var. totale cliente</span>
-        <div class="field-readonly" id="out-var-tot">—</div>
-        <span class="field-unit">€/km</span>
-      </div>
-
-      <hr class="divider">
-      <div class="metrics-2" style="margin-bottom:8px;">
-        <div class="metric">
-          <div class="metric-label">Canone cliente</div>
-          <div class="metric-value" id="m-canone-new">—</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label">Profitto / perdita</div>
-          <div class="metric-value" id="m-profit-new">—</div>
-        </div>
-      </div>
-      <div class="metrics-2">
-        <div class="metric">
-          <div class="metric-label">Diff. sul cliente</div>
-          <div class="metric-value" id="m-diff-cliente">—</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label" id="sweet-label">Sweet spot</div>
-          <div class="metric-value" id="m-sweet">—</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="alert" id="warn-box"></div>
-
-  <div class="chart-legend">
-    <span class="legend-item"><span class="legend-line" style="background:#3266ad;"></span>Canone attuale</span>
-    <span class="legend-item"><span class="legend-line" style="border-top:2px dashed #E24B4A;height:0;"></span>Canone nuovo</span>
-    <span class="legend-item"><span class="legend-line" style="border-top:2px dotted #1D9E75;height:0;"></span>Costo noleggiatore</span>
-    <span class="legend-item"><span class="legend-dot" style="background:#BA7517;"></span>Sweet spot</span>
-  </div>
-  <div class="chart-wrap">
-    <canvas id="chart" role="img" aria-label="Grafico comparativo canone attuale, proposto e costo noleggiatore">Grafico interattivo del modello di rinegoziazione.</canvas>
-  </div>
-
-  <footer>Simulatore rinegoziazione noleggio — uso interno</footer>
-
+<header>
+<h1>Simulatore rinegoziazione noleggio</h1>
+<p>Inserisci i parametri del contratto attuale e usa gli slider per simulare la proposta.</p>
+</header>
+<div class="grid-2">
+<div class="card">
+<div class="section-label">Contratto attuale</div>
+<div class="field-row">
+<span class="field-label">Rata noleggiatore <span class="iva-tag">(IVA inclusa)</span></span>
+<input type="number" id="inp-costo" min="0" step="1" value="300">
+<span class="field-unit">€/mese</span>
 </div>
-
+<div class="field-row">
+<span class="field-label">Anticipo <span class="iva-tag">(IVA inclusa)</span></span>
+<input type="number" id="inp-anticipo" min="0" step="1" value="0">
+<span class="field-unit">€</span>
+</div>
+<div class="field-row">
+<span class="field-label">Durata</span>
+<input type="number" id="inp-durata" min="1" step="1" value="48">
+<span class="field-unit">mesi</span>
+</div>
+<div class="field-row">
+<span class="field-label" style="font-weight:500;color:var(--text);">Base di calcolo <span class="iva-tag">(IVA inclusa)</span></span>
+<div class="field-readonly" id="disp-base">—</div>
+<span class="field-unit">€/mese</span>
+</div>
+<div class="field-row">
+<span class="field-label">Rata fissa cliente <span class="iva-tag">(IVA inclusa)</span></span>
+<input type="number" id="inp-fissa" min="0" step="1" value="180">
+<span class="field-unit">€/mese</span>
+</div>
+<div class="field-row">
+<span class="field-label">Var. servizi cliente <span class="iva-tag">(IVA inclusa)</span></span>
+<input type="number" id="inp-serv" min="0" step="0.01" value="0.15">
+<span class="field-unit">€/km</span>
+</div>
+<div class="field-row">
+<span class="field-label">Var. assicurazione <span class="iva-tag">(IVA esente)</span></span>
+<input type="number" id="inp-ass" min="0" step="0.01" value="0.13">
+<span class="field-unit">€/km</span>
+</div>
+<div class="field-row">
+<span class="field-label" style="font-weight:500;color:var(--text);">Var. totale cliente</span>
+<div class="field-readonly" id="disp-var-tot">0.28</div>
+<span class="field-unit">€/km</span>
+</div>
+<div class="field-row">
+<span class="field-label">Percorrenza media</span>
+<input type="number" id="inp-km" min="0" step="10" value="400">
+<span class="field-unit">km/mese</span>
+</div>
+<button type="button" id="btn-calcola" class="btn-calcola">Calcola proposta (+20%)</button>
+<hr class="divider">
+<div class="metrics-2">
+<div class="metric">
+<div class="metric-label">Canone cliente</div>
+<div class="metric-value" id="m-canone-att">—</div>
+</div>
+<div class="metric">
+<div class="metric-label">Profitto / perdita</div>
+<div class="metric-value" id="m-profit-att">—</div>
+</div>
+</div>
+</div>
+<div class="card">
+<div class="section-label">
+<span>Proposta rinegoziata</span>
+<span class="pill" id="pill-stato" style="background:var(--bg-warning);color:var(--text-warning)">in corso</span>
+</div>
+<div class="slider-row">
+<div class="slider-header">
+<span class="slider-name">Rata fissa <span class="iva-tag">(IVA inclusa)</span></span>
+<span class="slider-val" id="lbl-nfissa">—</span>
+</div>
+<input type="range" id="sl-fissa" step="1" oninput="onSlider()">
+<div class="slider-sub" id="sub-fissa"></div>
+</div>
+<div class="slider-row">
+<div class="slider-header">
+<span class="slider-name">Var. servizi <span class="iva-tag">(IVA inclusa)</span></span>
+<span class="slider-val" id="lbl-nserv">—</span>
+</div>
+<input type="range" id="sl-serv" min="0" max="0.40" step="0.01" oninput="onSlider()">
+<div class="slider-sub" id="sub-serv"></div>
+</div>
+<div class="field-row" style="margin-top:4px;">
+<span class="field-label">Var. assicurazione <span class="iva-tag">(IVA esente)</span></span>
+<div class="field-readonly" id="out-ass">0.13</div>
+<span class="field-unit">€/km</span>
+</div>
+<div class="field-row">
+<span class="field-label" style="font-weight:500;color:var(--text);">Var. totale cliente</span>
+<div class="field-readonly" id="out-var-tot">—</div>
+<span class="field-unit">€/km</span>
+</div>
+<hr class="divider">
+<div class="metrics-2" style="margin-bottom:8px;">
+<div class="metric">
+<div class="metric-label">Canone cliente</div>
+<div class="metric-value" id="m-canone-new">—</div>
+</div>
+<div class="metric">
+<div class="metric-label">Profitto / perdita</div>
+<div class="metric-value" id="m-profit-new">—</div>
+</div>
+</div>
+<div class="metrics-2">
+<div class="metric">
+<div class="metric-label">Diff. sul cliente</div>
+<div class="metric-value" id="m-diff-cliente">—</div>
+</div>
+<div class="metric">
+<div class="metric-label" id="sweet-label">Sweet spot</div>
+<div class="metric-value" id="m-sweet">—</div>
+</div>
+</div>
+</div>
+</div>
+<div class="alert" id="warn-box"></div>
+<div class="chart-legend">
+<span class="legend-item"><span class="legend-line" style="background:#3266ad;"></span>Canone attuale</span>
+<span class="legend-item"><span class="legend-line" style="border-top:2px dashed #E24B4A;height:0;"></span>Canone nuovo</span>
+<span class="legend-item"><span class="legend-line" style="border-top:2px dotted #1D9E75;height:0;"></span>Costo noleggiatore</span>
+<span class="legend-item"><span class="legend-dot" style="background:#BA7517;"></span>Sweet spot</span>
+</div>
+<div class="chart-wrap">
+<canvas id="chart" role="img" aria-label="Grafico comparativo canone attuale, proposto e costo noleggiatore">Grafico interattivo del modello di rinegoziazione.</canvas>
+</div>
+<div class="disclaimer" id="disclaimer-box">PUOI PROPORRE IN OMAGGIO 1 MESE DI VARIABILE GRATUITO</div>
+<footer>Simulatore rinegoziazione noleggio — uso interno</footer>
+</div>
 <script>
 let chart = null;
 function g(id) { return document.getElementById(id); }
 function val(id) { return parseFloat(g(id).value) || 0; }
-
 function getParams() {
+  const costoRata = val('inp-costo');
+  const anticipo = val('inp-anticipo');
+  const durata = val('inp-durata');
+  // Base di calcolo = rata noleggiatore - quota mensile anticipo.
+  // Sostituisce la rata noleggiatore grezza in tutti i calcoli di profitto/margine.
+  const costo = costoRata - (durata > 0 ? anticipo / durata : 0);
   return {
-    costo: val('inp-costo'),
+    costoRata: costoRata,
+    anticipo: anticipo,
+    durata: durata,
+    costo: costo,
     fissa: val('inp-fissa'),
-    serv:  val('inp-serv'),
-    ass:   val('inp-ass'),
-    km:    val('inp-km')
+    serv: val('inp-serv'),
+    ass: val('inp-ass'),
+    km: val('inp-km')
   };
 }
-
 function initSliders() {
   const p = getParams();
   g('disp-var-tot').textContent = (p.serv + p.ass).toFixed(2);
+  // Obiettivo: il punto di convenienza per il cliente (sweet spot) cade
+  // esattamente a +20% della percorrenza attuale inserita in input.
+  const targetKm = p.km * 1.2;
+  // Leva sul cliente: riduzione del 20% della variabile servizi (allineata al centesimo).
+  const nServ = Math.max(0, +(p.serv * 0.8).toFixed(2));
+  const dServ = p.serv - nServ;
+  // Rata fissa ricavata di conseguenza per centrare il break-even su targetKm:
+  // sweetKm = (nFissa - fissa) / (serv - nServ) => nFissa = fissa + dServ * targetKm
+  const nFissa = dServ > 0 ? p.fissa + dServ * targetKm : p.fissa;
   const sf = g('sl-fissa');
-  sf.min   = Math.max(0, p.fissa - 60);
-  sf.max   = p.fissa + 120;
-  sf.value = p.fissa + 20;
-  g('sl-serv').value = Math.max(0, p.serv - 0.03).toFixed(2);
+  sf.step = 0.01;
+  sf.min = Math.max(0, Math.min(p.fissa - 60, nFissa - 40));
+  sf.max = Math.max(p.fissa + 120, nFissa + 40);
+  sf.value = nFissa;
+  const sv = g('sl-serv');
+  sv.max = Math.max(0.40, +p.serv.toFixed(2));
+  sv.value = nServ;
   render();
 }
-
 function onSlider() { render(); }
-
 function render() {
   const p = getParams();
   const nFissa = parseFloat(g('sl-fissa').value);
-  const nServ  = parseFloat(g('sl-serv').value);
+  const nServ = parseFloat(g('sl-serv').value);
   const nVarTot = nServ + p.ass;
-
-  g('lbl-nfissa').textContent  = nFissa.toFixed(0) + ' €';
-  g('lbl-nserv').textContent   = nServ.toFixed(2) + ' €/km';
-  g('out-ass').textContent     = p.ass.toFixed(2);
+  const fNum = Math.abs(nFissa - Math.round(nFissa)) < 0.005 ? nFissa.toFixed(0) : nFissa.toFixed(2);
+  g('lbl-nfissa').textContent = fNum + ' €';
+  g('lbl-nserv').textContent = nServ.toFixed(2) + ' €/km';
+  g('out-ass').textContent = p.ass.toFixed(2);
   g('out-var-tot').textContent = nVarTot.toFixed(2);
-
+  g('disp-base').textContent = p.costo.toFixed(0) + ' €';
   const dF = nFissa - p.fissa;
   const dS = nServ - p.serv;
   g('sub-fissa').textContent = (dF >= 0 ? '+' : '') + dF.toFixed(0) + ' € vs attuale';
-  g('sub-serv').textContent  = (dS >= 0 ? '+' : '') + dS.toFixed(2) + ' €/km vs attuale';
-
-  const cAtt   = p.fissa + (p.serv + p.ass) * p.km;
-  const profAtt = cAtt - p.costo - p.ass * p.km;
+  g('sub-serv').textContent = (dS >= 0 ? '+' : '') + dS.toFixed(2) + ' €/km vs attuale';
+  const cAtt = p.fissa + (p.serv + p.ass) * p.km;
+  // Profitto: assicurazione esclusa (costo passante, non incide sul margine)
+  const profAtt = (p.fissa + p.serv * p.km) - p.costo;
   g('m-canone-att').textContent = cAtt.toFixed(0) + ' €';
   g('m-profit-att').textContent = (profAtt >= 0 ? '+' : '') + profAtt.toFixed(0) + ' €';
   g('m-profit-att').style.color = profAtt >= 0 ? '#3B6D11' : '#A32D2D';
-
-  const cNew   = nFissa + nVarTot * p.km;
-  const profNew = cNew - p.costo - p.ass * p.km;
+  const cNew = nFissa + nVarTot * p.km;
+  // Profitto: assicurazione esclusa (costo passante, non incide sul margine)
+  const profNew = (nFissa + nServ * p.km) - p.costo;
   g('m-canone-new').textContent = cNew.toFixed(0) + ' €';
   g('m-profit-new').textContent = (profNew >= 0 ? '+' : '') + profNew.toFixed(0) + ' €';
   g('m-profit-new').style.color = profNew >= 0 ? '#3B6D11' : '#A32D2D';
-
   const diffCliente = cNew - cAtt;
   g('m-diff-cliente').textContent = (diffCliente >= 0 ? '+' : '') + diffCliente.toFixed(0) + ' €';
   g('m-diff-cliente').style.color = diffCliente > 0 ? '#A32D2D' : '#3B6D11';
-
+  g('disclaimer-box').style.display = diffCliente >= 8 ? 'block' : 'none';
   const dVar = p.serv - nServ;
   let sweetKm = null;
   if (dVar > 0.001) sweetKm = (nFissa - p.fissa) / dVar;
-
   const pill = g('pill-stato');
   const warn = g('warn-box');
-
   if (sweetKm !== null && sweetKm > 0) {
     const ratio = sweetKm / p.km;
     g('m-sweet').textContent = Math.round(sweetKm) + ' km';
@@ -429,7 +450,6 @@ function render() {
     pill.style.color = 'var(--text-warning)';
     warn.style.display = 'none';
   }
-
   const maxKm = Math.max(p.km * 2.8, sweetKm ? sweetKm * 1.6 : p.km * 2.5);
   const N = 40;
   const labels = [], dOld = [], dNew = [], dCosto = [];
@@ -440,12 +460,10 @@ function render() {
     dNew.push(+(nFissa + nVarTot * km).toFixed(2));
     dCosto.push(+(p.costo + p.ass * km).toFixed(2));
   }
-
   const sweetIdx = sweetKm !== null && sweetKm > 0
     ? labels.reduce((bi, v, i) => Math.abs(v - sweetKm) < Math.abs(labels[bi] - sweetKm) ? i : bi, 0)
     : null;
   const sweetData = labels.map((_, i) => i === sweetIdx ? dOld[i] : null);
-
   if (chart) chart.destroy();
   chart = new Chart(g('chart'), {
     type: 'line',
@@ -481,12 +499,11 @@ function render() {
     }
   });
 }
-
-['inp-costo','inp-fissa','inp-serv','inp-ass','inp-km'].forEach(id => {
+['inp-costo','inp-anticipo','inp-durata','inp-fissa','inp-serv','inp-ass','inp-km'].forEach(id => {
   g(id).addEventListener('change', initSliders);
   g(id).addEventListener('input', initSliders);
 });
-
+g('btn-calcola').addEventListener('click', initSliders);
 initSliders();
 </script>
 </body>
