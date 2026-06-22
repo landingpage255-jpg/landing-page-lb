@@ -95,6 +95,7 @@
   .field-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
   .field-label { font-size: 13px; color: var(--text-secondary); flex: 1; }
   .field-unit { font-size: 12px; color: var(--text-tertiary); white-space: nowrap; }
+  .iva-tag { font-size: 10px; color: var(--text-tertiary); font-weight: 400; white-space: nowrap; }
 
   input[type="text"], input[type="number"] {
     width: 88px;
@@ -177,6 +178,36 @@
   .chart-wrap { position: relative; width: 100%; height: 280px; }
 
   footer { margin-top: 2rem; text-align: center; font-size: 12px; color: var(--text-tertiary); }
+
+  .disclaimer {
+    display: none;
+    margin-top: 1.5rem;
+    padding: 14px 18px;
+    border-radius: var(--radius);
+    background: var(--bg-success);
+    color: var(--text-success);
+    border: 0.5px solid var(--border-success);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-align: center;
+  }
+
+  .btn-calcola {
+    width: 100%;
+    margin-top: 1.25rem;
+    padding: 10px 14px;
+    border-radius: var(--radius);
+    border: 0.5px solid #378ADD;
+    background: #378ADD;
+    color: #fff;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .btn-calcola:hover { background: #2f78c4; border-color: #2f78c4; }
+  .btn-calcola:active { transform: translateY(0.5px); }
 </style>
 </head>
 <body>
@@ -193,26 +224,37 @@
       <div class="section-label">Contratto attuale</div>
 
       <div class="field-row">
-        <span class="field-label">Targa / ID cliente</span>
-        <input type="text" id="inp-targa" value="GG666GG">
-      </div>
-      <div class="field-row">
-        <span class="field-label">Costo noleggiatore</span>
+        <span class="field-label">Rata noleggiatore <span class="iva-tag">(IVA inclusa)</span></span>
         <input type="number" id="inp-costo" min="0" step="1" value="300">
         <span class="field-unit">€/mese</span>
       </div>
       <div class="field-row">
-        <span class="field-label">Rata fissa cliente</span>
+        <span class="field-label">Anticipo <span class="iva-tag">(IVA inclusa)</span></span>
+        <input type="number" id="inp-anticipo" min="0" step="1" value="0">
+        <span class="field-unit">€</span>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Durata</span>
+        <input type="number" id="inp-durata" min="1" step="1" value="48">
+        <span class="field-unit">mesi</span>
+      </div>
+      <div class="field-row">
+        <span class="field-label" style="font-weight:500;color:var(--text);">Base di calcolo <span class="iva-tag">(IVA inclusa)</span></span>
+        <div class="field-readonly" id="disp-base">—</div>
+        <span class="field-unit">€/mese</span>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Rata fissa cliente <span class="iva-tag">(IVA inclusa)</span></span>
         <input type="number" id="inp-fissa" min="0" step="1" value="180">
         <span class="field-unit">€/mese</span>
       </div>
       <div class="field-row">
-        <span class="field-label">Var. servizi cliente</span>
+        <span class="field-label">Var. servizi cliente <span class="iva-tag">(IVA inclusa)</span></span>
         <input type="number" id="inp-serv" min="0" step="0.01" value="0.15">
         <span class="field-unit">€/km</span>
       </div>
       <div class="field-row">
-        <span class="field-label">Var. assicurazione</span>
+        <span class="field-label">Var. assicurazione <span class="iva-tag">(IVA esente)</span></span>
         <input type="number" id="inp-ass" min="0" step="0.01" value="0.13">
         <span class="field-unit">€/km</span>
       </div>
@@ -226,6 +268,8 @@
         <input type="number" id="inp-km" min="0" step="10" value="400">
         <span class="field-unit">km/mese</span>
       </div>
+
+      <button type="button" id="btn-calcola" class="btn-calcola">Calcola proposta (+20%)</button>
 
       <hr class="divider">
       <div class="metrics-2">
@@ -248,7 +292,7 @@
 
       <div class="slider-row">
         <div class="slider-header">
-          <span class="slider-name">Rata fissa</span>
+          <span class="slider-name">Rata fissa <span class="iva-tag">(IVA inclusa)</span></span>
           <span class="slider-val" id="lbl-nfissa">—</span>
         </div>
         <input type="range" id="sl-fissa" step="1" oninput="onSlider()">
@@ -257,7 +301,7 @@
 
       <div class="slider-row">
         <div class="slider-header">
-          <span class="slider-name">Var. servizi</span>
+          <span class="slider-name">Var. servizi <span class="iva-tag">(IVA inclusa)</span></span>
           <span class="slider-val" id="lbl-nserv">—</span>
         </div>
         <input type="range" id="sl-serv" min="0" max="0.40" step="0.01" oninput="onSlider()">
@@ -265,7 +309,7 @@
       </div>
 
       <div class="field-row" style="margin-top:4px;">
-        <span class="field-label">Var. assicurazione</span>
+        <span class="field-label">Var. assicurazione <span class="iva-tag">(IVA esente)</span></span>
         <div class="field-readonly" id="out-ass">0.13</div>
         <span class="field-unit">€/km</span>
       </div>
@@ -311,6 +355,8 @@
     <canvas id="chart" role="img" aria-label="Grafico comparativo canone attuale, proposto e costo noleggiatore">Grafico interattivo del modello di rinegoziazione.</canvas>
   </div>
 
+  <div class="disclaimer" id="disclaimer-box">PUOI PROPORRE IN OMAGGIO 1 MESE DI VARIABILE GRATUITO</div>
+
   <footer>Simulatore rinegoziazione noleggio — uso interno</footer>
 
 </div>
@@ -321,8 +367,17 @@ function g(id) { return document.getElementById(id); }
 function val(id) { return parseFloat(g(id).value) || 0; }
 
 function getParams() {
+  const costoRata = val('inp-costo');
+  const anticipo  = val('inp-anticipo');
+  const durata    = val('inp-durata');
+  // Base di calcolo = rata noleggiatore - quota mensile anticipo.
+  // Sostituisce la rata noleggiatore grezza in tutti i calcoli di profitto/margine.
+  const costo = costoRata - (durata > 0 ? anticipo / durata : 0);
   return {
-    costo: val('inp-costo'),
+    costoRata: costoRata,
+    anticipo:  anticipo,
+    durata:    durata,
+    costo: costo,
     fissa: val('inp-fissa'),
     serv:  val('inp-serv'),
     ass:   val('inp-ass'),
@@ -333,11 +388,29 @@ function getParams() {
 function initSliders() {
   const p = getParams();
   g('disp-var-tot').textContent = (p.serv + p.ass).toFixed(2);
+
+  // Obiettivo: il punto di convenienza per il cliente (sweet spot) cade
+  // esattamente a +20% della percorrenza attuale inserita in input.
+  const targetKm = p.km * 1.2;
+
+  // Leva sul cliente: riduzione del 20% della variabile servizi (allineata al centesimo).
+  const nServ  = Math.max(0, +(p.serv * 0.8).toFixed(2));
+  const dServ  = p.serv - nServ;
+
+  // Rata fissa ricavata di conseguenza per centrare il break-even su targetKm:
+  // sweetKm = (nFissa - fissa) / (serv - nServ)  =>  nFissa = fissa + dServ * targetKm
+  const nFissa = dServ > 0 ? p.fissa + dServ * targetKm : p.fissa;
+
   const sf = g('sl-fissa');
-  sf.min   = Math.max(0, p.fissa - 60);
-  sf.max   = p.fissa + 120;
-  sf.value = p.fissa + 20;
-  g('sl-serv').value = Math.max(0, p.serv - 0.03).toFixed(2);
+  sf.step  = 0.01;
+  sf.min   = Math.max(0, Math.min(p.fissa - 60, nFissa - 40));
+  sf.max   = Math.max(p.fissa + 120, nFissa + 40);
+  sf.value = nFissa;
+
+  const sv = g('sl-serv');
+  sv.max   = Math.max(0.40, +p.serv.toFixed(2));
+  sv.value = nServ;
+
   render();
 }
 
@@ -349,10 +422,12 @@ function render() {
   const nServ  = parseFloat(g('sl-serv').value);
   const nVarTot = nServ + p.ass;
 
-  g('lbl-nfissa').textContent  = nFissa.toFixed(0) + ' €';
+  const fNum = Math.abs(nFissa - Math.round(nFissa)) < 0.005 ? nFissa.toFixed(0) : nFissa.toFixed(2);
+  g('lbl-nfissa').textContent  = fNum + ' €';
   g('lbl-nserv').textContent   = nServ.toFixed(2) + ' €/km';
   g('out-ass').textContent     = p.ass.toFixed(2);
   g('out-var-tot').textContent = nVarTot.toFixed(2);
+  g('disp-base').textContent   = p.costo.toFixed(0) + ' €';
 
   const dF = nFissa - p.fissa;
   const dS = nServ - p.serv;
@@ -360,13 +435,15 @@ function render() {
   g('sub-serv').textContent  = (dS >= 0 ? '+' : '') + dS.toFixed(2) + ' €/km vs attuale';
 
   const cAtt   = p.fissa + (p.serv + p.ass) * p.km;
-  const profAtt = cAtt - p.costo - p.ass * p.km;
+  // Profitto: assicurazione esclusa (costo passante, non incide sul margine)
+  const profAtt = (p.fissa + p.serv * p.km) - p.costo;
   g('m-canone-att').textContent = cAtt.toFixed(0) + ' €';
   g('m-profit-att').textContent = (profAtt >= 0 ? '+' : '') + profAtt.toFixed(0) + ' €';
   g('m-profit-att').style.color = profAtt >= 0 ? '#3B6D11' : '#A32D2D';
 
   const cNew   = nFissa + nVarTot * p.km;
-  const profNew = cNew - p.costo - p.ass * p.km;
+  // Profitto: assicurazione esclusa (costo passante, non incide sul margine)
+  const profNew = (nFissa + nServ * p.km) - p.costo;
   g('m-canone-new').textContent = cNew.toFixed(0) + ' €';
   g('m-profit-new').textContent = (profNew >= 0 ? '+' : '') + profNew.toFixed(0) + ' €';
   g('m-profit-new').style.color = profNew >= 0 ? '#3B6D11' : '#A32D2D';
@@ -374,6 +451,7 @@ function render() {
   const diffCliente = cNew - cAtt;
   g('m-diff-cliente').textContent = (diffCliente >= 0 ? '+' : '') + diffCliente.toFixed(0) + ' €';
   g('m-diff-cliente').style.color = diffCliente > 0 ? '#A32D2D' : '#3B6D11';
+  g('disclaimer-box').style.display = diffCliente >= 8 ? 'block' : 'none';
 
   const dVar = p.serv - nServ;
   let sweetKm = null;
@@ -482,10 +560,12 @@ function render() {
   });
 }
 
-['inp-costo','inp-fissa','inp-serv','inp-ass','inp-km'].forEach(id => {
+['inp-costo','inp-anticipo','inp-durata','inp-fissa','inp-serv','inp-ass','inp-km'].forEach(id => {
   g(id).addEventListener('change', initSliders);
   g(id).addEventListener('input', initSliders);
 });
+
+g('btn-calcola').addEventListener('click', initSliders);
 
 initSliders();
 </script>
