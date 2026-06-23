@@ -224,12 +224,12 @@
       <div class="section-label">Contratto attuale</div>
 
       <div class="field-row">
-        <span class="field-label">Rata noleggiatore <span class="iva-tag">(IVA esclusa)</span></span>
+        <span class="field-label">Rata mensile noleggiatore <span class="iva-tag">(IVA esclusa)</span></span>
         <input type="number" id="inp-costo" min="0" step="1" value="300">
         <span class="field-unit">€/mese</span>
       </div>
       <div class="field-row">
-        <span class="field-label">Rata noleggiatore <span class="iva-tag">(IVA inclusa)</span></span>
+        <span class="field-label">Rata mensile noleggiatore <span class="iva-tag">(IVA inclusa)</span></span>
         <div class="field-readonly" id="disp-rata-ivata">—</div>
         <span class="field-unit">€/mese</span>
       </div>
@@ -239,7 +239,7 @@
         <span class="field-unit">€</span>
       </div>
       <div class="field-row">
-        <span class="field-label">Durata</span>
+        <span class="field-label">Durata totale</span>
         <input type="number" id="inp-durata" min="1" step="1" value="48">
         <span class="field-unit">mesi</span>
       </div>
@@ -249,22 +249,22 @@
         <span class="field-unit">€/mese</span>
       </div>
       <div class="field-row">
-        <span class="field-label">Rata fissa cliente <span class="iva-tag">(IVA inclusa)</span></span>
+        <span class="field-label">Quota locazione <span class="iva-tag">(IVA inclusa)</span></span>
         <input type="number" id="inp-fissa" min="0" step="1" value="180">
         <span class="field-unit">€/mese</span>
       </div>
       <div class="field-row">
-        <span class="field-label">Var. servizi cliente <span class="iva-tag">(IVA inclusa)</span></span>
+        <span class="field-label">Quota variabile servizi <span class="iva-tag">(IVA inclusa)</span></span>
         <input type="number" id="inp-serv" min="0" step="0.01" value="0.15">
         <span class="field-unit">€/km</span>
       </div>
       <div class="field-row">
-        <span class="field-label">Var. assicurazione <span class="iva-tag">(IVA esente)</span></span>
+        <span class="field-label">Quota variabile assicurativa <span class="iva-tag">(IVA esente)</span></span>
         <input type="number" id="inp-ass" min="0" step="0.01" value="0.13">
         <span class="field-unit">€/km</span>
       </div>
       <div class="field-row">
-        <span class="field-label" style="font-weight:500;color:var(--text);">Var. totale cliente</span>
+        <span class="field-label" style="font-weight:500;color:var(--text);">Quota variabile totale</span>
         <div class="field-readonly" id="disp-var-tot">0.28</div>
         <span class="field-unit">€/km</span>
       </div>
@@ -297,7 +297,7 @@
 
       <div class="slider-row">
         <div class="slider-header">
-          <span class="slider-name">Rata fissa <span class="iva-tag">(IVA inclusa)</span></span>
+          <span class="slider-name">Quota locazione NEW <span class="iva-tag">(IVA inclusa)</span></span>
           <span class="slider-val" id="lbl-nfissa">—</span>
         </div>
         <input type="range" id="sl-fissa" step="1" oninput="onSlider()">
@@ -306,7 +306,7 @@
 
       <div class="slider-row">
         <div class="slider-header">
-          <span class="slider-name">Var. servizi <span class="iva-tag">(IVA inclusa)</span></span>
+          <span class="slider-name">Quota variabile servizi NEW <span class="iva-tag">(IVA inclusa)</span></span>
           <span class="slider-val" id="lbl-nserv">—</span>
         </div>
         <input type="range" id="sl-serv" min="0" max="0.40" step="0.01" oninput="onSlider()">
@@ -314,12 +314,12 @@
       </div>
 
       <div class="field-row" style="margin-top:4px;">
-        <span class="field-label">Var. assicurazione <span class="iva-tag">(IVA esente)</span></span>
+        <span class="field-label">Quota variabile assicurativa <span class="iva-tag">(IVA esente)</span></span>
         <div class="field-readonly" id="out-ass">0.13</div>
         <span class="field-unit">€/km</span>
       </div>
       <div class="field-row">
-        <span class="field-label" style="font-weight:500;color:var(--text);">Var. totale cliente</span>
+        <span class="field-label" style="font-weight:500;color:var(--text);">Quota variabile totale NEW</span>
         <div class="field-readonly" id="out-var-tot">—</div>
         <span class="field-unit">€/km</span>
       </div>
