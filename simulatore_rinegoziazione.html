@@ -224,8 +224,13 @@
       <div class="section-label">Contratto attuale</div>
 
       <div class="field-row">
-        <span class="field-label">Rata noleggiatore <span class="iva-tag">(IVA inclusa)</span></span>
+        <span class="field-label">Rata noleggiatore <span class="iva-tag">(IVA esclusa)</span></span>
         <input type="number" id="inp-costo" min="0" step="1" value="300">
+        <span class="field-unit">€/mese</span>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Rata noleggiatore <span class="iva-tag">(IVA inclusa)</span></span>
+        <div class="field-readonly" id="disp-rata-ivata">—</div>
         <span class="field-unit">€/mese</span>
       </div>
       <div class="field-row">
@@ -269,7 +274,7 @@
         <span class="field-unit">km/mese</span>
       </div>
 
-      <button type="button" id="btn-calcola" class="btn-calcola">Calcola proposta (+20%)</button>
+      <button type="button" id="btn-calcola" class="btn-calcola">Calcola proposta (+30%)</button>
 
       <hr class="divider">
       <div class="metrics-2">
@@ -367,13 +372,16 @@ function g(id) { return document.getElementById(id); }
 function val(id) { return parseFloat(g(id).value) || 0; }
 
 function getParams() {
-  const costoRata = val('inp-costo');
+  const IVA = 0.22;
+  const costoRataNetto = val('inp-costo');          // rata noleggiatore IVA esclusa (input)
+  const costoRata = costoRataNetto * (1 + IVA);      // + IVA 22% -> valore ivato
   const anticipo  = val('inp-anticipo');
   const durata    = val('inp-durata');
-  // Base di calcolo = rata noleggiatore - quota mensile anticipo.
+  // Base di calcolo = rata noleggiatore ivata - quota mensile anticipo.
   // Sostituisce la rata noleggiatore grezza in tutti i calcoli di profitto/margine.
   const costo = costoRata - (durata > 0 ? anticipo / durata : 0);
   return {
+    costoRataNetto: costoRataNetto,
     costoRata: costoRata,
     anticipo:  anticipo,
     durata:    durata,
@@ -390,8 +398,8 @@ function initSliders() {
   g('disp-var-tot').textContent = (p.serv + p.ass).toFixed(2);
 
   // Obiettivo: il punto di convenienza per il cliente (sweet spot) cade
-  // esattamente a +20% della percorrenza attuale inserita in input.
-  const targetKm = p.km * 1.2;
+  // esattamente a +30% della percorrenza attuale inserita in input.
+  const targetKm = p.km * 1.3;
 
   // Leva sul cliente: riduzione del 20% della variabile servizi (allineata al centesimo).
   const nServ  = Math.max(0, +(p.serv * 0.8).toFixed(2));
@@ -427,6 +435,7 @@ function render() {
   g('lbl-nserv').textContent   = nServ.toFixed(2) + ' €/km';
   g('out-ass').textContent     = p.ass.toFixed(2);
   g('out-var-tot').textContent = nVarTot.toFixed(2);
+  g('disp-rata-ivata').textContent = p.costoRata.toFixed(2) + ' €';
   g('disp-base').textContent   = p.costo.toFixed(0) + ' €';
 
   const dF = nFissa - p.fissa;
@@ -459,34 +468,39 @@ function render() {
 
   const pill = g('pill-stato');
   const warn = g('warn-box');
+  warn.style.display = 'block';
 
   if (sweetKm !== null && sweetKm > 0) {
     const ratio = sweetKm / p.km;
+    const pct = Math.round((ratio - 1) * 100);
+    const segno = pct >= 0 ? '+' : '';
+    const msg = 'Per il cliente la proposta diventa conveniente da ' + Math.round(sweetKm) + ' km/mese (' + segno + pct + '% rispetto alla percorrenza attuale).';
     g('m-sweet').textContent = Math.round(sweetKm) + ' km';
     g('sweet-label').textContent = 'Convenienza da';
     if (ratio <= 1.3) {
       pill.textContent = 'ottima';
       pill.style.background = 'var(--bg-success)';
       pill.style.color = 'var(--text-success)';
-      warn.style.display = 'none';
+      warn.style.background = 'var(--bg-success)';
+      warn.style.color = 'var(--text-success)';
+      warn.style.border = '0.5px solid var(--border-success)';
+      warn.textContent = msg;
     } else if (ratio <= 1.8) {
       pill.textContent = 'ragionevole';
       pill.style.background = 'var(--bg-info)';
       pill.style.color = 'var(--text-info)';
-      warn.style.display = 'block';
       warn.style.background = 'var(--bg-info)';
       warn.style.color = 'var(--text-info)';
       warn.style.border = '0.5px solid var(--border-info)';
-      warn.textContent = 'Il cliente risparmia a partire da ' + Math.round(sweetKm) + ' km (+' + Math.round((ratio-1)*100) + '% vs ora). Valuta se è realistico per questo profilo.';
+      warn.textContent = msg + ' Valuta se è realistico per questo profilo.';
     } else {
       pill.textContent = 'difficile';
       pill.style.background = 'var(--bg-danger)';
       pill.style.color = 'var(--text-danger)';
-      warn.style.display = 'block';
       warn.style.background = 'var(--bg-danger)';
       warn.style.color = 'var(--text-danger)';
       warn.style.border = '0.5px solid var(--border-danger)';
-      warn.textContent = 'Il punto di convenienza è a ' + Math.round(sweetKm) + ' km (+' + Math.round((ratio-1)*100) + '% vs ora). Troppo lontano dai km reali del cliente.';
+      warn.textContent = msg + ' Troppo lontano dai km reali del cliente.';
     }
   } else if (dVar <= 0.001 && nFissa > p.fissa) {
     g('m-sweet').textContent = 'Mai';
@@ -494,18 +508,20 @@ function render() {
     pill.textContent = 'non conveniente';
     pill.style.background = 'var(--bg-danger)';
     pill.style.color = 'var(--text-danger)';
-    warn.style.display = 'block';
     warn.style.background = 'var(--bg-danger)';
     warn.style.color = 'var(--text-danger)';
     warn.style.border = '0.5px solid var(--border-danger)';
-    warn.textContent = 'La variabile servizi non è diminuita: il cliente paga sempre di più senza mai recuperare.';
+    warn.textContent = 'La variabile servizi non è diminuita: nessuna percorrenza rende la proposta conveniente per il cliente.';
   } else {
     g('m-sweet').textContent = '—';
     g('sweet-label').textContent = 'Convenienza da';
     pill.textContent = 'in corso';
     pill.style.background = 'var(--bg-warning)';
     pill.style.color = 'var(--text-warning)';
-    warn.style.display = 'none';
+    warn.style.background = 'var(--bg-warning)';
+    warn.style.color = 'var(--text-warning)';
+    warn.style.border = '0.5px solid var(--border-warning)';
+    warn.textContent = 'Modifica la proposta (più rata fissa e meno variabile servizi) per generare un punto di convenienza per il cliente.';
   }
 
   const maxKm = Math.max(p.km * 2.8, sweetKm ? sweetKm * 1.6 : p.km * 2.5);
